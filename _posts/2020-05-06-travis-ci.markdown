@@ -1,0 +1,112 @@
+---
+layout: post
+title: "CicadaPlayer Travis ci 持续集成"
+data: 2020-05-06 16:35:10 +0800
+categories: jekyll update
+---
+## 1. Travis CI的作用
+Travis CI 官网:
+
+[https://travis-ci.org/](https://travis-ci.org/)
+
+Travis CI是一个提供持续集成的工具，如果您正在开发一个开源项目，那么Travis CI是一个免费的工具，可以在有push动作时，自动完成编译，编译结果可以通过一个图标来显示。
+
+比如我们在工程的README.md中加入下列代码
+```
+[![Build Status](https://api.travis-ci.org/alibaba/CicadaPlayer.svg?branch=develop)](https://travis-ci.org/alibaba/CicadaPlayer)
+```
+在github的项目主页上就可以显示这样一个图标
+
+[![Build Status](https://api.travis-ci.org/alibaba/CicadaPlayer.svg?branch=develop)](https://travis-ci.org/alibaba/CicadaPlayer)
+
+表示编译成功，这样任何人在任何时候都可以一目了然的知道该工程是否可以编译通过。
+
+持续集成是一个软件项目的基础能力，依靠Travis我们不仅可以检查每次提交的代码是否能够编译通过，还可以进行单元测试，覆盖率统计，代码提交检查，
+代码静态扫描，等许多工作。
+
+## 2. 如何实现一个Travis CI
+先使用自己的github账号登录到Travis CI 官网，然后同步和设置自己的项目，这里就不多说了。当然Travis CI 官网也有很多文档可以去看。
+
+Travis CI会默认查找工程里面的一个.travis.yml的文件，根据这个文件来执行整个编译过程。
+
+想在Travis CI上实现自动化编译，前提是肯定需要在本地机器有自动化编译脚本，本文示例工程是跨平台的编译，我们先实现他的Linux平台的编译。
+
+本文示例工程的编译流程可以参考
+
+[compile_Linux.md](https://github.com/aliyun/CicadaPlayer/blob/develop/doc/compile_Linux.md)
+
+简单来说就是在Ubuntu 18.04的机器上安装一些软件，然后执行编译。
+
+### 2.1 选择Ubuntu 18.04作为编译环境
+在Travis上可以选择Linux编译环境
+
+```
+os:
+- linux
+```
+  表示要使用Linux编译环境
+```
+dist: bionic
+```
+这个是Ubuntu的18.04的版本代号，表示要用Ubuntu 18.04
+
+这里注意，我们尽量选择本机编译环境和Travis环境一致，这样在编译出错的时候，我们很容易定位问题。我们这里都选择Ubuntu 18.04。
+
+### 2.2 安装一些编译需要的软件
+Ubuntu 上安装软件需要sudo权限，所以
+```
+sudo: required
+```
+一般在before_install阶段去安装一些工具
+```
+- sudo apt-get update
+- sudo apt-get install -y yasm
+- sudo apt-get install -y libsdl2-dev
+```
+
+由于本文示例工程使用的cmake版本比较高，根据Travis官方文档默认的cmake版本是3.12，所以我们要升级一下cmake
+```
+- wget "https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Linux-x86_64.tar.gz"
+- tar zxvf cmake-3.16.2-Linux-x86_64.tar.gz
+- export PATH=`pwd`/cmake-3.16.2-Linux-x86_64/bin:$PATH
+```
+
+### 2.3 设置编译器
+本文示例工程在Linux环境下需要使用clang，在Travis上也可以轻松实现
+```
+compiler:
+- clang
+```
+
+后面两个阶段就是直接运行在本机已经运行通过的编译脚本了。
+```
+language: cpp
+sudo: required
+dist: bionic
+compiler:
+  - clang
+os:
+  - linux
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y yasm
+  - sudo apt-get install -y libsdl2-dev
+  - wget "https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Linux-x86_64.tar.gz"
+  - tar zxvf cmake-3.16.2-Linux-x86_64.tar.gz
+  - export PATH=`pwd`/cmake-3.16.2-Linux-x86_64/bin:$PATH
+
+before_script:
+  - . setup.env
+  - cd external/
+  - ./build_external.sh Linux
+  - cd ../
+
+script:
+  - cd cmdline/
+  - mkdir build
+  - cd build
+  - cmake ../
+  - make cicadaPlayer -j8
+```
+
