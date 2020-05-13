@@ -102,3 +102,7 @@ categories: jekyll update
 2. decoder avcodecDecoder
 3. ffmpegAudioFilter
 4. 其他utils aes md5
+
+---
+
+{% include gitalk.html %} 
