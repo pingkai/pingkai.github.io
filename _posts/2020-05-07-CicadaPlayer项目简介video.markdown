@@ -68,6 +68,7 @@ categories: jekyll update
 
 ---
 # 05.基本媒体数据类型及其内存管理
+<iframe height="498" width="510" src="https://player.youku.com/embed/XNDY2OTY1MTA0NA==" frameborder="0" allowfullscreen></iframe>
 1. 数据和meta分离的结构
 2. clone方法
 3. AVAFPacket和AVAFFrame的实现
@@ -86,7 +87,10 @@ categories: jekyll update
 7. 数据在模块间的传递
 
 ---
+
 # 06.CicadaPlayer中对ffmpeg的使用(1)
+
+<iframe height="498" width="510" src="https://player.youku.com/embed/XNDY2OTY1OTAzMg==" frameborder="0" allowfullscreen></iframe>
 1. DataSource ffmpegDataSource
 2. demuxer avFormatDemuxer avFormatSubtitleDemuxer
 3. bsf AVBSF AFAVBSF
