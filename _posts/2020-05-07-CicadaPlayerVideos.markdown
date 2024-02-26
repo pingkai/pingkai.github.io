@@ -103,6 +103,3 @@ categories: jekyll update
 3. ffmpegAudioFilter
 4. 其他utils aes md5
 
----
-
-{% include gitalk.html %} 
